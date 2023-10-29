@@ -128,8 +128,8 @@ void video_renderer_size(float *f_width_source, float *f_height_source, float *f
 }
 
 void  video_renderer_init(logger_t *render_logger, const char *server_name, videoflip_t videoflip[2], const char *parser,
-                          const char *decoder, const char *converter, const char *videosink, const bool *initial_fullscreen,
-                          const bool *video_sync) {
+                          const char *decoder, const char *converter, const char *post_converter,
+                          const char *videosink, const bool *initial_fullscreen, const bool *video_sync) {
     GError *error = NULL;
     GstCaps *caps = NULL;
     GstClock *clock = gst_system_clock_obtain();
@@ -155,6 +155,7 @@ void  video_renderer_init(logger_t *render_logger, const char *server_name, vide
     g_string_append(launch, " ! ");
     g_string_append(launch, converter);
     g_string_append(launch, " ! ");    
+    g_string_append(launch, post_converter);
     append_videoflip(launch, &videoflip[0], &videoflip[1]);
     g_string_append(launch, videosink);
     g_string_append(launch, " name=video_sink");

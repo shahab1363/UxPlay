@@ -94,6 +94,7 @@ static bool close_window;
 static std::string video_parser = "h264parse";
 static std::string video_decoder = "decodebin";
 static std::string video_converter = "videoconvert";
+static std::string post_converter = " videoscale ! ";
 static bool show_client_FPS_data = false;
 static unsigned int max_ntp_timeouts = NTP_TIMEOUT_LIMIT;
 static FILE *video_dumpfile = NULL;
@@ -457,6 +458,7 @@ static void print_info (char *name) {
     printf("          choices: avdec_h264,vaapih264dec,nvdec,nvh264dec,v4l2h264dec\n");
     printf("-vc ...   Choose the GStreamer videoconverter; default \"videoconvert\"\n");
     printf("          another choice when using v4l2h264dec: v4l2convert\n");
+    printf("-pvc ...  Choose the GStreamer post video converter pipeline; default \" videoscale ! \"\n");
     printf("-vs ...   Choose the GStreamer videosink; default \"autovideosink\"\n");
     printf("          some choices: ximagesink,xvimagesink,vaapisink,glimagesink,\n");
     printf("          gtksink,waylandsink,osxvideosink,kmssink,d3d11videosink etc.\n");
@@ -773,6 +775,10 @@ static void parse_arguments (int argc, char *argv[]) {
             if (!option_has_value(i, argc, arg, argv[i+1])) exit(1);
             video_converter.erase();
             video_converter.append(argv[++i]);
+        } else if (arg == "-pvc") {
+            if (!option_has_value(i, argc, arg, argv[i+1])) exit(1);
+            post_converter.erase();
+            post_converter.append(argv[++i]);
         } else if (arg == "-vs") {
             if (!option_has_value(i, argc, arg, argv[i+1])) exit(1);
             videosink.erase();
@@ -1619,7 +1625,8 @@ int main (int argc, char *argv[]) {
 
     if (use_video) {
         video_renderer_init(render_logger, server_name.c_str(), videoflip, video_parser.c_str(),
-                            video_decoder.c_str(), video_converter.c_str(), videosink.c_str(), &fullscreen, &video_sync);
+                            video_decoder.c_str(), video_converter.c_str(), post_converter.c_str(),
+                            videosink.c_str(), &fullscreen, &video_sync);
         video_renderer_start();
     }
 
@@ -1672,7 +1679,8 @@ int main (int argc, char *argv[]) {
         if (use_video && close_window) {
             video_renderer_destroy();
             video_renderer_init(render_logger, server_name.c_str(), videoflip, video_parser.c_str(),
-                                video_decoder.c_str(), video_converter.c_str(), videosink.c_str(), &fullscreen,
+                                video_decoder.c_str(), video_converter.c_str(), post_converter.c_str(),
+                                videosink.c_str(), &fullscreen,
                                 &video_sync);
             video_renderer_start();
         }
